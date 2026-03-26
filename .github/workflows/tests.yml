@@ -2,9 +2,11 @@ name: Ruby tests
 on:
   push:
     branches:
+      - master
       - main
   pull_request:
     branches:
+      - master
       - main
   workflow_dispatch:
 jobs:
@@ -17,6 +19,7 @@ jobs:
       matrix:
         rails: ['6.1', '7.0', '7.1']
         ruby: ['3.1', '3.2', '3.3']
+        elasticsearch: ['8.19.12', '9.3.2']
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -28,11 +31,26 @@ jobs:
         sudo sysctl -w vm.max_map_count=262144
     - uses: elastic/elastic-github-actions/elasticsearch@master
       with:
-        stack-version: 8.15.0-SNAPSHOT
+        stack-version: ${{ matrix.elasticsearch }}
         security-enabled: false
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
+    - name: Pin Elasticsearch Ruby client to match server major version
+      run: |
+        ES_MAJOR=$(echo "${{ matrix.elasticsearch }}" | cut -d. -f1)
+        # For each Gemfile/gemfile, replace any existing gem 'elasticsearch' line
+        # with the version matching the matrix server major version. If no such
+        # line exists, append one. This ensures the Ruby client talks the same
+        # protocol as the test server without creating duplicate declarations.
+        find . \( -name "Gemfile" -o -name "*.gemfile" \) ! -name "*.lock" \
+          ! -path "*/examples/*" | while read -r file; do
+          if grep -q "gem 'elasticsearch'" "$file"; then
+            sed -i "/gem 'elasticsearch'/c\\gem 'elasticsearch', '~> ${ES_MAJOR}'" "$file"
+          else
+            echo "gem 'elasticsearch', '~> ${ES_MAJOR}'" >> "$file"
+          fi
+        done
     - name: Bundle
       run: |
         sudo apt-get install libsqlite3-dev

@@ -1,0 +1,35 @@
+name: Tag release on merge to master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Derive tag name from gem version
+        id: version
+        run: |
+          VERSION=$(ruby -e "require_relative 'elasticsearch-model/lib/elasticsearch/model/version'; puts Elasticsearch::Model::VERSION")
+          echo "tag=v${VERSION}-es9" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag if it does not already exist
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists — skipping."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag "$TAG"
+            git push origin "$TAG"
+            echo "Created and pushed tag $TAG"
+          fi

@@ -555,7 +555,6 @@ describe Elasticsearch::Model::Indexing do
     end
 
     context 'when the index exists' do
-
       let(:client) do
         double('client', indices: double('indices', exists: true))
       end
@@ -566,12 +565,28 @@ describe Elasticsearch::Model::Indexing do
     end
 
     context 'when the index does not exist' do
-      let(:client) do
-        double('client', indices: double('indices', exists: false))
+      context 'when the client returns false (ES9 behaviour)' do
+        let(:client) do
+          double('client', indices: double('indices', exists: false))
+        end
+
+        it 'returns false' do
+          expect(DummyIndexingModel.index_exists?).to be(false)
+        end
       end
 
-      it 'returns false' do
-        expect(DummyIndexingModel.index_exists?).to be(false)
+      context 'when the client raises NotFound (edge case)' do
+        let(:client) do
+          double('client').tap do |c|
+            allow(c).to receive_message_chain(:indices, :exists).and_raise(
+              Elastic::Transport::Transport::Errors::NotFound
+            )
+          end
+        end
+
+        it 'returns false' do
+          expect(DummyIndexingModel.index_exists?).to be(false)
+        end
       end
     end
   end
@@ -761,7 +776,7 @@ describe Elasticsearch::Model::Indexing do
     context 'when an index name is provided in the options' do
       before do
         expect(DummyIndexingModelForCreate).to receive(:client).and_return(client).twice
-        expect(indices).to receive(:exists).and_return(false)
+        expect(indices).to receive(:exists).and_raise(Elastic::Transport::Transport::Errors::NotFound)
         expect(indices).to receive(:create).with({ index: 'custom-foo', body: expected_body })
       end
 
