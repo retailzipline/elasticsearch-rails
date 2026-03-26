@@ -24,6 +24,9 @@ source 'https://rubygems.org'
 
 gemspec path: '../'
 
+# Pin to ES8 client so the test suite runs against a local ES8 server.
+# The gemspec allows >= 8, < 10 for production use — this pin is test-only
+# and has no effect on downstream consumers of the gem.
 gem 'elasticsearch', '~> 8'
 
 gem 'activemodel',  '~> 7.1'
