@@ -39,13 +39,18 @@ jobs:
     - name: Pin Elasticsearch Ruby client to match server major version
       run: |
         ES_MAJOR=$(echo "${{ matrix.elasticsearch }}" | cut -d. -f1)
-        # Inject a version pin into every Gemfile and gemfile so the Ruby client
-        # matches the server major version in this matrix cell. Without this,
-        # Bundler resolves to the latest allowed version (currently ES9), which
-        # sends incompatible headers to an ES8 server.
+        # For each Gemfile/gemfile, replace any existing gem 'elasticsearch' line
+        # with the version matching the matrix server major version. If no such
+        # line exists, append one. This ensures the Ruby client talks the same
+        # protocol as the test server without creating duplicate declarations.
         find . \( -name "Gemfile" -o -name "*.gemfile" \) ! -name "*.lock" \
-          ! -path "*/examples/*" \
-          -exec sh -c "echo \"gem 'elasticsearch', '~> ${ES_MAJOR}'\" >> {}" \;
+          ! -path "*/examples/*" | while read -r file; do
+          if grep -q "gem 'elasticsearch'" "$file"; then
+            sed -i "/gem 'elasticsearch'/c\\gem 'elasticsearch', '~> ${ES_MAJOR}'" "$file"
+          else
+            echo "gem 'elasticsearch', '~> ${ES_MAJOR}'" >> "$file"
+          fi
+        done
     - name: Bundle
       run: |
         sudo apt-get install libsqlite3-dev
