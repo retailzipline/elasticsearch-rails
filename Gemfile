@@ -19,7 +19,6 @@ source 'https://rubygems.org'
 
 gem 'ansi'
 gem 'cane'
-gem 'elasticsearch'
 gem 'pry'
 gem 'rake', '~> 12'
 
