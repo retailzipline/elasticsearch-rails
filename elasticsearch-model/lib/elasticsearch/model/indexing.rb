@@ -261,12 +261,13 @@ module Elasticsearch
         def index_exists?(options={})
           target_index = options[:index] || self.index_name
 
-          # ES8 supported `ignore: 404` to return false instead of raising on a
-          # missing index. ES9 removed the `ignore:` parameter — a missing index
-          # now raises NotFound. Rescuing here keeps the behaviour identical for
-          # callers on both ES8 and ES9.
-          self.client.indices.exists(index: target_index)
-          true
+          # ES8 supported `ignore: 404` which suppressed the NotFound exception
+          # and returned false for a missing index. ES9 changed this: the client
+          # returns false directly (no exception) for a missing index, and the
+          # `ignore:` parameter was removed. Using `!!` captures the boolean
+          # return value for ES9, while the rescue handles any edge cases where
+          # an exception is still raised.
+          !!self.client.indices.exists(index: target_index)
         rescue Elastic::Transport::Transport::Errors::NotFound
           false
         end

@@ -36,6 +36,13 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
+    - name: Pin Elasticsearch Ruby client to match server major version
+      run: |
+        ES_MAJOR=$(echo "${{ matrix.elasticsearch }}" | cut -d. -f1)
+        # Rewrite the ~> 8 pin in all Gemfiles and gemfiles to the correct major
+        # version so the Ruby client talks the same protocol as the test server.
+        find . \( -name "Gemfile" -o -name "*.gemfile" \) ! -name "*.lock" \
+          -exec sed -i "s/gem 'elasticsearch', '~> [0-9]'/gem 'elasticsearch', '~> ${ES_MAJOR}'/" {} \;
     - name: Bundle
       run: |
         sudo apt-get install libsqlite3-dev

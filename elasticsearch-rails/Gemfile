@@ -24,6 +24,12 @@ gem 'elasticsearch-model',
     path: File.expand_path('../elasticsearch-model', __dir__),
     require: false
 
+# Pin to ES8 client so the test suite runs against a local ES8 server.
+# The gemspec allows >= 8, < 10 for production use — this pin is test-only
+# and has no effect on downstream consumers of the gem.
+# In CI this line is overwritten to match the matrix server major version.
+gem 'elasticsearch', '~> 8'
+
 gem 'elasticsearch-persistence',
     path: File.expand_path('../elasticsearch-persistence', __dir__),
     require: false
