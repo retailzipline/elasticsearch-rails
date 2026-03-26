@@ -40,8 +40,10 @@ The version numbers follow the Elasticsearch major versions. Currently the `main
 | 5.x           | → | 5.x           |
 | 6.x           | → | 6.x           |
 | 7.x           | → | 7.x           |
-| 8.x           | → | 8.x           |
-| main          | → | 8.x           |
+| 8.x           | → | 8.x, 9.x      |
+| main          | → | 8.x, 9.x      |
+
+> **Note (retailzipline fork):** This fork extends the `8.x` gems to support Elasticsearch 9.x. The upstream `elastic/elasticsearch-rails` project has not yet published an official 9.x release. See [CHANGELOG.md](CHANGELOG.md) for details on what changed.
 
 Check out [Elastic product end of life dates](https://www.elastic.co/support/eol) to learn which releases are still actively supported and tested.
 
