@@ -19,7 +19,7 @@ source 'https://rubygems.org'
 
 gem 'ansi'
 gem 'cane'
-gem 'elasticsearch', '~> 8'
+gem 'elasticsearch'
 gem 'pry'
 gem 'rake', '~> 12'
 

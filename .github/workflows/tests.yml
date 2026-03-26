@@ -44,6 +44,7 @@ jobs:
         # Bundler resolves to the latest allowed version (currently ES9), which
         # sends incompatible headers to an ES8 server.
         find . \( -name "Gemfile" -o -name "*.gemfile" \) ! -name "*.lock" \
+          ! -path "*/examples/*" \
           -exec sh -c "echo \"gem 'elasticsearch', '~> ${ES_MAJOR}'\" >> {}" \;
     - name: Bundle
       run: |
