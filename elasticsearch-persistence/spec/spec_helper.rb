@@ -26,7 +26,15 @@ RSpec.configure do |config|
   config.formatter = 'documentation'
   config.color = true
 
-  config.before(:suite) { puts "Elasticsearch Version: #{DEFAULT_CLIENT.info['version']}" }
+  config.before(:suite) do
+    # ES 9.4+ defaults `action.destructive_requires_name` to true, which rejects
+    # `_all`/wildcard deletes. Relax it for the test cluster so the after(:suite)
+    # cleanup works uniformly across ES 8.x and 9.x.
+    DEFAULT_CLIENT.cluster.put_settings(
+      body: { persistent: { 'action.destructive_requires_name' => false } }
+    )
+    puts "Elasticsearch Version: #{DEFAULT_CLIENT.info['version']}"
+  end
   config.after(:suite) do
     DEFAULT_CLIENT.indices.delete(index: '_all')
   end

@@ -1,3 +1,11 @@
+## 8.0.1-es9 (retailzipline fork)
+
+Adds Elasticsearch 9.x compatibility on top of the `8.0.1` release.
+
+- **elasticsearch-model**: Relaxes the `elasticsearch` gem dependency from `~> 8` to `>= 8, < 10`, allowing use with the Elasticsearch 9.x Ruby client.
+- **elasticsearch-persistence**: Same dependency relaxation as above.
+- **elasticsearch-model**: Fixes `index_exists?` to be compatible with the Elasticsearch 9.x client, which removed support for the `ignore: 404` parameter on `client.indices.exists`. The method now rescues `Elastic::Transport::Transport::Errors::NotFound` instead of relying on the suppressed response.
+
 ## 8.0.1
 
 Bugfix release:
