@@ -1,9 +1,9 @@
-name: Tag release on merge to master
+name: Tag release on merge to main
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   tag:
